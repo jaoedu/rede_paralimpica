@@ -2,6 +2,11 @@ from django import forms
 from .models import Post, Comment, Athlete, Coach, Competition, News, Sponsor
 
 
+class LoginForm(forms.Form):
+    username = forms.CharField(max_length=150)
+    password = forms.CharField(widget=forms.PasswordInput)
+
+
 class PostForm(forms.ModelForm):
     class Meta:
         model = Post
@@ -14,9 +19,6 @@ class CommentForm(forms.ModelForm):
         fields = ["content"]
 
 
-# Forms para os outros modelos (se necessário):
-
-
 class AthleteForm(forms.ModelForm):
     class Meta:
         model = Athlete
@@ -27,28 +29,28 @@ class AthleteForm(forms.ModelForm):
             "competition_history",
             "personal_records",
             "photos",
-        ]  # ou os campos que desejar
+        ]
 
 
 class CoachForm(forms.ModelForm):
     class Meta:
         model = Coach
-        fields = "__all__"  # ou especifique os campos
+        fields = ["specialization", "trained_athletes", "experience"]
 
 
 class CompetitionForm(forms.ModelForm):
     class Meta:
         model = Competition
-        fields = "__all__"  # ou especifique os campos
+        fields = ["name", "date", "location", "modalities"]
 
 
 class NewsForm(forms.ModelForm):
     class Meta:
         model = News
-        fields = "__all__"  # ou especifique os campos
+        fields = ["title", "content"]
 
 
 class SponsorForm(forms.ModelForm):
     class Meta:
         model = Sponsor
-        fields = "__all__"  # ou especifique os campos
+        fields = ["name", "logo", "description", "sponsorship_level"]

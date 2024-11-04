@@ -7,7 +7,12 @@
             <p class="lead">Acompanhe as últimas notícias e resultados da natação paralímpica.</p>
             <div class="mt-4">
                 <a href="{% url 'athlete_list' %}" class="btn btn-primary mr-2">Ver Atletas</a>
-                <a href="{% url 'create_athlete' %}" class="btn btn-primary mr-2">Cadastrar Atleta</a>
+                <a href="{% url 'login' %}?next={% url 'create_athlete' %}" class="btn btn-primary mr-2">Cadastrar Atleta</a>
+                <a href="{% url 'login' %}?next={% url 'create_coach' %}" class="btn btn-primary mr-2">Cadastrar Treinador</a>
+                <a href="{% url 'login' %}?next={% url 'create_sponsor' %}" class="btn btn-primary mr-2">Cadastrar Patrocinador</a>
+                <a href="{% url 'competition_calendar' %}" class="btn btn-primary mr-2">Calendário de Competições</a>
+                <a href="{% url 'sponsor_list' %}" class="btn btn-primary mr-2">Patrocinadores</a>
+                <a href="{% url 'feed' %}" class="btn btn-primary mr-2">Feed</a>
             </div>
         </div>
     </div>

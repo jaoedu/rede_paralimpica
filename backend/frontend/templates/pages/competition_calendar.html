@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Calendário de Competições</h1>
+
+    <div class="row">
+        {% for competition in competitions %}
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ competition.name }}</h5>
+                    <p class="card-text">Data: {{ competition.date }}</p>
+                    <p class="card-text">Local: {{ competition.location }}</p>
+                    <a href="{% url 'competition_detail' competition.id %}" class="btn btn-primary">Ver Detalhes</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% endblock %}

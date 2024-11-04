@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect
 from django.views.generic import (
     ListView,
     DetailView,
@@ -7,8 +7,19 @@ from django.views.generic import (
     DeleteView,
 )
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.urls import reverse_lazy  # Importe reverse_lazy
-from .models import Athlete, Coach, Competition, News, Sponsor, Post, Comment, Like
+from django.contrib.auth.views import LoginView, LogoutView
+from django.urls import reverse_lazy
+from .models import (
+    News,
+    Athlete,
+    Competition,
+    Coach,
+    Sponsor,
+    Post,
+    Comment,
+    Like,
+    User,
+)
 from .forms import (
     PostForm,
     CommentForm,
@@ -17,6 +28,7 @@ from .forms import (
     CompetitionForm,
     NewsForm,
     SponsorForm,
+    LoginForm,
 )
 
 
@@ -39,21 +51,23 @@ class AthleteDetailView(DetailView):
     template_name = "pages/athlete_detail.html"
 
 
-class AthleteCreateView(LoginRequiredMixin, CreateView):
+class CreateAthleteView(LoginRequiredMixin, CreateView):
     model = Athlete
-    form_class = AthleteForm  # Use o formulário AthleteForm
-    template_name = "pages/athlete_form.html"
+    form_class = AthleteForm
+    template_name = "pages/create_athlete.html"
     success_url = reverse_lazy("athlete_list")
 
     def form_valid(self, form):
         form.instance.user = self.request.user
+        form.instance.user.is_athlete = True
+        form.instance.user.save()
         return super().form_valid(form)
 
 
 class AthleteUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Athlete
-    form_class = AthleteForm  # Use o formulário AthleteForm
-    template_name = "pages/athlete_form.html"
+    form_class = AthleteForm
+    template_name = "pages/create_athlete.html"
     success_url = reverse_lazy("athlete_list")
 
     def test_func(self):
@@ -82,32 +96,23 @@ class CoachDetailView(DetailView):
     template_name = "pages/coach_detail.html"
 
 
-class CoachCreateView(LoginRequiredMixin, CreateView):  # View para criar treinador
+class CreateCoachView(LoginRequiredMixin, CreateView):
     model = Coach
     form_class = CoachForm
-    template_name = "pages/coach_form.html"
+    template_name = "pages/create_coach.html"
     success_url = reverse_lazy("coach_list")
 
     def form_valid(self, form):
         form.instance.user = self.request.user
-        return super().form_valid(form)
-
-
-class CoachCreateView(LoginRequiredMixin, CreateView):
-    model = Coach
-    form_class = CoachForm
-    template_name = "pages/coach_form.html"  # Certifique-se de ter esse template
-    success_url = reverse_lazy("coach_list")
-
-    def form_valid(self, form):
-        form.instance.user = self.request.user
+        form.instance.user.is_coach = True
+        form.instance.user.save()
         return super().form_valid(form)
 
 
 class CoachUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Coach
     form_class = CoachForm
-    template_name = "pages/coach_form.html"  # Mesmo template para create e update
+    template_name = "pages/create_coach.html"
     success_url = reverse_lazy("coach_list")
 
     def test_func(self):
@@ -117,7 +122,7 @@ class CoachUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
 class CoachDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Coach
-    template_name = "pages/coach_confirm_delete.html"  # Crie este template
+    template_name = "pages/coach_confirm_delete.html"
     success_url = reverse_lazy("coach_list")
 
     def test_func(self):
@@ -125,22 +130,33 @@ class CoachDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         return self.request.user == coach.user
 
 
+class CompetitionListView(ListView):
+    model = Competition
+    template_name = "pages/competition_list.html"
+    context_object_name = "competitions"
+
+
+class CompetitionDetailView(DetailView):
+    model = Competition
+    template_name = "pages/competition_detail.html"
+
+
 class CompetitionCreateView(LoginRequiredMixin, CreateView):
     model = Competition
     form_class = CompetitionForm
-    template_name = "pages/competition_form.html"
+    template_name = "pages/create_competition.html"
     success_url = reverse_lazy("competition_list")
 
 
 class CompetitionUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Competition
     form_class = CompetitionForm
-    template_name = "pages/competition_form.html"
+    template_name = "pages/create_competition.html"
     success_url = reverse_lazy("competition_list")
 
     def test_func(self):
         competition = self.get_object()
-        return self.request.user.is_staff  # Apenas staff pode editar
+        return self.request.user.is_staff
 
 
 class CompetitionDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
@@ -150,13 +166,26 @@ class CompetitionDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView)
 
     def test_func(self):
         competition = self.get_object()
-        return self.request.user.is_staff  # Apenas staff pode deletar
+        return self.request.user.is_staff
+
+
+class NewsListView(ListView):
+    model = News
+    template_name = "pages/news_list.html"
+    context_object_name = "news"
+    ordering = "-publication_date"
+
+
+class NewsDetailView(DetailView):
+    model = News
+    template_name = "pages/news_detail.html"
+    context_object_name = "article"
 
 
 class NewsCreateView(LoginRequiredMixin, CreateView):
     model = News
     form_class = NewsForm
-    template_name = "pages/news_form.html"
+    template_name = "pages/create_news.html"
     success_url = reverse_lazy("news_list")
 
     def form_valid(self, form):
@@ -167,7 +196,7 @@ class NewsCreateView(LoginRequiredMixin, CreateView):
 class NewsUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = News
     form_class = NewsForm
-    template_name = "pages/news_form.html"
+    template_name = "pages/create_news.html"
     success_url = reverse_lazy("news_list")
 
     def test_func(self):
@@ -185,22 +214,34 @@ class NewsDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         return self.request.user == news.author
 
 
-class SponsorCreateView(LoginRequiredMixin, CreateView):
+class SponsorListView(ListView):
+    model = Sponsor
+    template_name = "pages/sponsor_list.html"
+    context_object_name = "sponsors"
+
+
+class CreateSponsorView(LoginRequiredMixin, CreateView):
     model = Sponsor
     form_class = SponsorForm
-    template_name = "pages/sponsor_form.html"
+    template_name = "pages/create_sponsor.html"
     success_url = reverse_lazy("sponsor_list")
+
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        form.instance.user.is_sponsor = True
+        form.instance.user.save()
+        return super().form_valid(form)
 
 
 class SponsorUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Sponsor
     form_class = SponsorForm
-    template_name = "pages/sponsor_form.html"
+    template_name = "pages/create_sponsor.html"
     success_url = reverse_lazy("sponsor_list")
 
     def test_func(self):
         sponsor = self.get_object()
-        return self.request.user.is_staff  # Apenas staff pode editar
+        return self.request.user.is_staff
 
 
 class SponsorDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
@@ -210,37 +251,7 @@ class SponsorDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
     def test_func(self):
         sponsor = self.get_object()
-        return self.request.user.is_staff  # Apenas staff pode deletar
-
-
-class CompetitionListView(ListView):
-    model = Competition
-    template_name = "pages/competition_list.html"
-    context_object_name = "competitions"
-
-
-class CompetitionDetailView(DetailView):
-    model = Competition
-    template_name = "pages/competition_detail.html"
-
-
-class NewsListView(ListView):
-    model = News
-    template_name = "pages/news_list.html"
-    context_object_name = "news"
-    ordering = "-publication_date"
-
-
-class NewsDetailView(DetailView):
-    model = News
-    template_name = "pages/news_detail.html"
-    context_object_name = "article"
-
-
-class SponsorListView(ListView):
-    model = Sponsor
-    template_name = "pages/sponsor_list.html"
-    context_object_name = "sponsors"
+        return self.request.user.is_staff
 
 
 class FeedView(LoginRequiredMixin, ListView):
@@ -277,9 +288,39 @@ class CommentView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-def like_view(request, post_id):
-    post = get_object_or_404(Post, id=post_id)
-    like, created = Like.objects.get_or_create(post=post, user=request.user)
-    if not created:
-        like.delete()
-    return redirect("feed")
+class LikePostView(LoginRequiredMixin, CreateView):
+    model = Like
+    fields = []
+
+    def form_valid(self, form):
+        form.instance.post = get_object_or_404(Post, id=self.kwargs["post_id"])
+        form.instance.user = self.request.user
+        like = Like.objects.filter(post=form.instance.post, user=form.instance.user)
+        if like.exists():
+            like.delete()
+        else:
+            form.save()
+        return redirect("post_detail", pk=self.kwargs["post_id"])
+
+
+class LoginView(LoginView):
+    template_name = "pages/login.html"
+    redirect_authenticated_user = True
+    success_url = reverse_lazy("home")
+
+
+class LogoutView(LogoutView):
+    next_page = "home"
+
+
+class CompetitionCalendarView(ListView):
+    model = Competition
+    template_name = "pages/competition_calendar.html"
+    context_object_name = "competitions"
+
+
+class LoginView(LoginView):
+    template_name = "pages/login.html"
+    form_class = LoginForm
+    redirect_authenticated_user = True
+    success_url = reverse_lazy("home")

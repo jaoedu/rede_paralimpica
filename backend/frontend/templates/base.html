@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Natação Paralímpica</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    {% block styles %}{% endblock %}
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="{% url 'home' %}">Natação Paralímpica</a>
+            <ul>
+                <li><a href="{% url 'athlete_list' %}">Atletas</a></li>
+                <li><a href="{% url 'competition_list' %}">Competições</a></li>
+                <li><a href="{% url 'news_list' %}">Notícias</a></li>
+                <li><a href="{% url 'sponsor_list' %}">Patrocinadores</a></li>
+                <li><a href="{% url 'feed' %}">Feed</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Natação Paralímpica</p>
+    </footer>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

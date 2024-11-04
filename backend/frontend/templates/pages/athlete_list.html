@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Atletas</h1>
+
+    <div class="row">
+        {% for athlete in athletes %}
+        <div class="col-md-4 mb-4">
+            <div class="card athlete-card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ athlete.user.get_full_name }}</h5>
+                    <p class="card-text">Classificação: {{ athlete.functional_classification }}</p>
+                    <p class="card-text">Modalidades: {% for modality in athlete.modalities.all %}{{ modality.name }}, {% endfor %}</p>
+                    <a href="{% url 'athlete_detail' athlete.id %}" class="btn btn-primary">Ver Detalhes</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% endblock %}

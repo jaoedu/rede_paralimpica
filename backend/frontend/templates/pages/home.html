@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="jumbotron jumbotron-fluid hero">
+        <div class="container text-center">
+            <h1 class="display-4">Bem-vindo à Natação Paralímpica</h1>
+            <p class="lead">Acompanhe as últimas notícias e resultados da natação paralímpica.</p>
+            <div class="mt-4">
+                <a href="{% url 'athlete_list' %}" class="btn btn-primary mr-2">Ver Atletas</a>
+                <a href="{% url 'create_athlete' %}" class="btn btn-primary mr-2">Cadastrar Atleta</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>Últimas Notícias</h2>
+        <div class="row">
+            {% for news in latest_news %}
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ news.title }}</h5>
+                        <p class="card-text">{{ news.content|truncatewords:20 }}</p>
+                        <a href="{% url 'news_detail' news.id %}" class="btn btn-primary">Ler Mais</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

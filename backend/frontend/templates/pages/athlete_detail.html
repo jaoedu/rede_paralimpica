@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Detalhes do Atleta</h1>
+
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">{{ athlete.user.get_full_name }}</h5>
+            <p class="card-text">Classificação: {{ athlete.functional_classification }}</p>
+            <p class="card-text">Data de Nascimento: {{ athlete.birth_date }}</p>
+            <p class="card-text">Modalidades: {% for modality in athlete.modalities.all %}{{ modality.name }}, {% endfor %}</p>
+            <p class="card-text">Histórico de Competições: {{ athlete.competition_history }}</p>
+            <p class="card-text">Recordes Pessoais: {{ athlete.personal_records }}</p>
+
+            <h5>Fotos</h5>
+            <div class="row">
+                {% for photo in athlete.photos.all %}
+                <div class="col-md-4 mb-4">
+                    <img src="{{ photo.image.url }}" alt="{{ photo.description }}" class="img-fluid">
+                    <p>{{ photo.description }}</p>
+                </div>
+                {% empty %}
+                <p>Nenhuma foto disponível.</p>
+                {% endfor %}
+            </div>
+
+            <div class="mt-4">
+                <h5>Treinadores</h5>
+                <ul>
+                    {% for coach in athlete.coaches.all %}
+                    <li>{{ coach.user.get_full_name }} - {{ coach.specialization }}</li>
+                    {% empty %}
+                    <li>Nenhum treinador cadastrado.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+{% endblock %}

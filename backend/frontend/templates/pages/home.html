@@ -6,13 +6,17 @@
             <h1 class="display-4">Bem-vindo à Natação Paralímpica</h1>
             <p class="lead">Acompanhe as últimas notícias e resultados da natação paralímpica.</p>
             <div class="mt-4">
-                <a href="{% url 'athlete_list' %}" class="btn btn-primary mr-2">Ver Atletas</a>
-                <a href="{% url 'login' %}?next={% url 'create_athlete' %}" class="btn btn-primary mr-2">Cadastrar Atleta</a>
-                <a href="{% url 'login' %}?next={% url 'create_coach' %}" class="btn btn-primary mr-2">Cadastrar Treinador</a>
-                <a href="{% url 'login' %}?next={% url 'create_sponsor' %}" class="btn btn-primary mr-2">Cadastrar Patrocinador</a>
-                <a href="{% url 'competition_calendar' %}" class="btn btn-primary mr-2">Calendário de Competições</a>
-                <a href="{% url 'sponsor_list' %}" class="btn btn-primary mr-2">Patrocinadores</a>
-                <a href="{% url 'feed' %}" class="btn btn-primary mr-2">Feed</a>
+                <h2>Escolha seu tipo de usuário</h2>
+                <div>
+                    <a href="{% url 'create_athlete' %}" class="btn btn-primary mr-2">Cadastrar como Atleta</a>
+                    <a href="{% url 'create_coach' %}" class="btn btn-primary mr-2">Cadastrar como Treinador</a>
+                    <a href="{% url 'create_sponsor' %}" class="btn btn-primary mr-2">Cadastrar como Patrocinador</a>
+                </div>
+                <p class="mt-3">Se você é um usuário comum, você pode navegar pelas seções sem precisar de login.</p>
+                <a href="{% url 'athlete_list' %}" class="btn btn-secondary">Ver Atletas</a>
+                <a href="{% url 'competition_calendar' %}" class="btn btn-secondary">Calendário de Competições</a>
+                <a href="{% url 'sponsor_list' %}" class="btn btn-secondary">Patrocinadores</a>
+                <a href="{% url 'feed' %}" class="btn btn-secondary">Feed</a>
             </div>
         </div>
     </div>

@@ -51,14 +51,18 @@ class AthleteDetailView(DetailView):
     template_name = "pages/athlete_detail.html"
 
 
-class CreateAthleteView(LoginRequiredMixin, CreateView):
+class CreateAthleteView(CreateView):
     model = Athlete
     form_class = AthleteForm
     template_name = "pages/create_athlete.html"
     success_url = reverse_lazy("athlete_list")
 
     def form_valid(self, form):
-        form.instance.user = self.request.user
+        user = User.objects.create_user(
+            username=form.cleaned_data["username"],
+            password=form.cleaned_data["password"],
+        )
+        form.instance.user = user
         form.instance.user.is_athlete = True
         form.instance.user.save()
         return super().form_valid(form)
@@ -96,14 +100,18 @@ class CoachDetailView(DetailView):
     template_name = "pages/coach_detail.html"
 
 
-class CreateCoachView(LoginRequiredMixin, CreateView):
+class CreateCoachView(CreateView):
     model = Coach
     form_class = CoachForm
     template_name = "pages/create_coach.html"
     success_url = reverse_lazy("coach_list")
 
     def form_valid(self, form):
-        form.instance.user = self.request.user
+        user = User.objects.create_user(
+            username=form.cleaned_data["username"],
+            password=form.cleaned_data["password"],
+        )
+        form.instance.user = user
         form.instance.user.is_coach = True
         form.instance.user.save()
         return super().form_valid(form)
@@ -220,14 +228,18 @@ class SponsorListView(ListView):
     context_object_name = "sponsors"
 
 
-class CreateSponsorView(LoginRequiredMixin, CreateView):
+class CreateSponsorView(CreateView):
     model = Sponsor
     form_class = SponsorForm
     template_name = "pages/create_sponsor.html"
     success_url = reverse_lazy("sponsor_list")
 
     def form_valid(self, form):
-        form.instance.user = self.request.user
+        user = User.objects.create_user(
+            username=form.cleaned_data["username"],
+            password=form.cleaned_data["password"],
+        )
+        form.instance.user = user
         form.instance.user.is_sponsor = True
         form.instance.user.save()
         return super().form_valid(form)
@@ -301,13 +313,6 @@ class LikePostView(LoginRequiredMixin, CreateView):
         else:
             form.save()
         return redirect("post_detail", pk=self.kwargs["post_id"])
-
-
-class LoginView(LoginView):
-    template_name = "pages/login.html"
-    redirect_authenticated_user = True
-    success_url = reverse_lazy("home")
-
 
 class LogoutView(LogoutView):
     next_page = "home"

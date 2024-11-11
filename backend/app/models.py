@@ -3,6 +3,9 @@ from django.db import models
 
 
 class User(AbstractUser):
+    is_athlete = models.BooleanField(default=False)
+    is_coach = models.BooleanField(default=False)
+    is_sponsor = models.BooleanField(default=False)
     date_of_birth = models.DateField(null=True, blank=True)
     phone_number = models.CharField(max_length=20, null=True, blank=True)
     address = models.CharField(max_length=200, null=True, blank=True)

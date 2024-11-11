@@ -1,36 +1,44 @@
 <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Natação Paralímpica</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    {% block styles %}{% endblock %}
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="{% url 'home' %}">Natação Paralímpica</a>
+            <ul>
+                <li><a href="{% url 'athlete_list' %}">Atletas</a></li>
+                <li><a href="{% url 'competition_calendar' %}">Competições</a></li>
+                <li><a href="{% url 'news_list' %}">Notícias</a></li>
+                <li><a href="{% url 'sponsor_list' %}">Patrocinadores</a></li>
+                <li><a href="{% url 'feed' %}">Feed</a></li>
+                {% if user.is_authenticated %}
+                    {% if user.is_athlete or user.is_coach or user.is_sponsor %}
+                        <li><a href="{% url 'logout' %}">Logout</a></li>
+                    {% else %}
+                        <li><a href="{% url 'login' %}">Login</a></li>
+                    {% endif %}
+                {% else %}
+                    <li><a href="{% url 'login' %}">Login</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </header>
 
-{% block content %}
-    <div class="jumbotron jumbotron-fluid hero">
-        <div class="container text-center">
-            <h1 class="display-4">Bem-vindo à Natação Paralímpica</h1>
-            <p class="lead">Acompanhe as últimas notícias e resultados da natação paralímpica.</p>
-            <div class="mt-4">
-                <a href="{% url 'athlete_list' %}" class="btn btn-primary mr-2">Ver Atletas</a>
-                <a href="{% url 'login' %}?next={% url 'create_athlete' %}" class="btn btn-primary mr-2">Cadastrar Atleta</a>
-                <a href="{% url 'login' %}?next={% url 'create_coach' %}" class="btn btn-primary mr-2">Cadastrar Treinador</a>
-                <a href="{% url 'login' %}?next={% url 'create_sponsor' %}" class="btn btn-primary mr-2">Cadastrar Patrocinador</a>
-                <a href="{% url 'competition_calendar' %}" class="btn btn-primary mr-2">Calendário de Competições</a>
-                <a href="{% url 'sponsor_list' %}" class="btn btn-primary mr-2">Patrocinadores</a>
-                <a href="{% url 'feed' %}" class="btn btn-primary mr-2">Feed</a>
-            </div>
-        </div>
-    </div>
+    <main>
+        {% block content %}{% endblock %}
+    </main>
 
-    <div class="container">
-        <h2>Últimas Notícias</h2>
-        <div class="row">
-            {% for news in latest_news %}
-            <div class="col-md-4 mb-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ news.title }}</h5>
-                        <p class="card-text">{{ news.content|truncatewords:20 }}</p>
-                        <a href="{% url 'news_detail' news.id %}" class="btn btn-primary">Ler Mais</a>
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-{% endblock %}
+    <footer>
+        <p>&copy; 2023 Natação Paralímpica</p>
+    </footer>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

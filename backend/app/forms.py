@@ -41,7 +41,11 @@ class CoachForm(forms.ModelForm):
 class CompetitionForm(forms.ModelForm):
     class Meta:
         model = Competition
-        fields = ["name", "date", "location", "modalities"]
+        fields = ["name", "date", "location", "modalities", "description", "event_type"]
+        widgets = {
+            "date": forms.DateInput(attrs={"type": "date"}),
+            "description": forms.Textarea(attrs={"rows": 4}),
+        }
 
 
 class NewsForm(forms.ModelForm):

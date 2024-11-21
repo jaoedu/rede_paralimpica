@@ -1,26 +1,16 @@
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import (
     ListView,
     DetailView,
     CreateView,
     UpdateView,
     DeleteView,
+    TemplateView,
 )
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.contrib.auth.views import LoginView, LogoutView
-from django.urls import reverse_lazy
-from .models import (
-    News,
-    Athlete,
-    Competition,
-    Coach,
-    Sponsor,
-    Post,
-    Comment,
-    Like,
-    User,
-)
-from .forms import (
+from django.urls import reverse_lazy,reverse
+from app.models import News, Athlete, Competition, Coach, Sponsor, Post,Like, Comment, User
+from app.forms import (
     PostForm,
     CommentForm,
     AthleteForm,
@@ -30,6 +20,13 @@ from .forms import (
     SponsorForm,
     LoginForm,
 )
+from django.utils import timezone
+from django.contrib.auth import login, logout
+
+
+# Index View
+class IndexView(TemplateView):
+    template_name = "pages/index.html"
 
 
 class HomeView(ListView):
@@ -40,6 +37,29 @@ class HomeView(ListView):
     paginate_by = 5
 
 
+# Login View
+def login_view(request):
+    if request.method == "POST":
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data["username"]
+            password = form.cleaned_data["password"]
+            user = User.objects.filter(username=username).first()
+            if user and user.check_password(password):
+                login(request, user)
+                return redirect("home")
+    else:
+        form = LoginForm()
+    return render(request, "pages/login.html", {"form": form})
+
+
+# Logout View
+def logout_view(request):
+    logout(request)
+    return redirect("home")
+
+
+# Athlete Views
 class AthleteListView(ListView):
     model = Athlete
     template_name = "pages/athlete_list.html"
@@ -89,6 +109,7 @@ class AthleteDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         return self.request.user == athlete.user
 
 
+# Coach Views
 class CoachListView(ListView):
     model = Coach
     template_name = "pages/coach_list.html"
@@ -138,6 +159,7 @@ class CoachDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         return self.request.user == coach.user
 
 
+# Competition Views
 class CompetitionListView(ListView):
     model = Competition
     template_name = "pages/competition_list.html"
@@ -153,7 +175,7 @@ class CompetitionCreateView(LoginRequiredMixin, CreateView):
     model = Competition
     form_class = CompetitionForm
     template_name = "pages/create_competition.html"
-    success_url = reverse_lazy("competition_list")
+    success_url = reverse_lazy("competition_calendar")
 
 
 class CompetitionUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
@@ -177,6 +199,32 @@ class CompetitionDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView)
         return self.request.user.is_staff
 
 
+class EventCalendarView(ListView):
+    model = Competition
+    template_name = "pages/competition_calendar.html"
+    context_object_name = "competitions"
+
+    def get_queryset(self):
+        # Filtra competições futuras
+        return Competition.objects.filter(date__gte=timezone.now()).order_by("date")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Prepara os dados das competições para o calendário
+        context["events"] = [
+            {
+                "title": competition.name,
+                "start": competition.date.isoformat(),  # Formato ISO para o FullCalendar
+                "location": competition.location,
+                "description": competition.description,
+                "event_type": competition.event_type,
+            }
+            for competition in context["competitions"]
+        ]
+        return context
+
+
+# News Views
 class NewsListView(ListView):
     model = News
     template_name = "pages/news_list.html"
@@ -222,6 +270,7 @@ class NewsDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         return self.request.user == news.author
 
 
+# Sponsor Views
 class SponsorListView(ListView):
     model = Sponsor
     template_name = "pages/sponsor_list.html"
@@ -266,6 +315,7 @@ class SponsorDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         return self.request.user.is_staff
 
 
+# Feed Views
 class FeedView(LoginRequiredMixin, ListView):
     model = Post
     template_name = "pages/feed.html"
@@ -284,7 +334,68 @@ class CreatePostView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class CommentView(LoginRequiredMixin, CreateView):
+class PostDetailView(DetailView):
+    model = Post
+    template_name = "pages/post_detail.html"
+    context_object_name = "post"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["comments"] = self.object.comments.all()
+        context["comment_form"] = CommentForm()
+        context["liked"] = Like.objects.filter(
+            post=self.object, user=self.request.user
+        ).exists()
+        return context
+
+
+class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Post
+    form_class = PostForm
+    template_name = "pages/create_post.html"  # Reutilize o template de criação
+    success_url = reverse_lazy("feed")
+
+    def test_func(self):
+        post = self.get_object()
+        return self.request.user == post.author
+
+
+class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Post
+    template_name = "pages/post_confirm_delete.html"
+    success_url = reverse_lazy("feed")
+
+    def test_func(self):
+        post = self.get_object()
+        return self.request.user == post.author
+
+
+class CommentUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Comment
+    form_class = CommentForm
+    template_name = "pages/comment_edit.html"
+
+    def get_success_url(self):
+        return reverse("post_detail", kwargs={"pk": self.object.post.pk})
+
+    def test_func(self):
+        comment = self.get_object()
+        return self.request.user == comment.author
+
+
+class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Comment
+    template_name = "pages/comment_confirm_delete.html"
+
+    def get_success_url(self):
+        return reverse("post_detail", kwargs={"pk": self.object.post.pk})
+
+    def test_func(self):
+        comment = self.get_object()
+        return self.request.user == comment.author
+
+
+class CommentView(CreateView):
     model = Comment
     form_class = CommentForm
     template_name = "pages/comment.html"
@@ -313,19 +424,3 @@ class LikePostView(LoginRequiredMixin, CreateView):
         else:
             form.save()
         return redirect("post_detail", pk=self.kwargs["post_id"])
-
-class LogoutView(LogoutView):
-    next_page = "home"
-
-
-class CompetitionCalendarView(ListView):
-    model = Competition
-    template_name = "pages/competition_calendar.html"
-    context_object_name = "competitions"
-
-
-class LoginView(LoginView):
-    template_name = "pages/login.html"
-    form_class = LoginForm
-    redirect_authenticated_user = True
-    success_url = reverse_lazy("home")

@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Login</h1>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="username">Nome de Usuário:</label>
+            <input type="text" name="username" id="username" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Senha:</label>
+            <input type="password" name="password" id="password" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Entrar</button>
+    </form>
+    <p>Não tem uma conta? <a href="{% url 'create_athlete' %}">Cadastre-se como Atleta</a> | <a href="{% url 'create_coach' %}">Cadastre-se como Treinador</a> | <a href="{% url 'create_sponsor' %}">Cadastre-se como Patrocinador</a></p>
+{% endblock %}

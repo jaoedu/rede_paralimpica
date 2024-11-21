@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.db import models
+from django.urls import reverse
 
 
 class User(AbstractUser):
@@ -60,18 +61,27 @@ class Modality(models.Model):
     def __str__(self):
         return self.name
 
-
+EVENT_TYPES = (
+    ("competição", "Competição"),
+    ("treinamento", "Treinamento"),
+    ("outro", "Outro"),
+)
 class Competition(models.Model):
     name = models.CharField(max_length=100)
     date = models.DateField()
     location = models.CharField(max_length=200)
     modalities = models.ManyToManyField(Modality, related_name="competitions")
     competition_results = models.ManyToManyField(
-        Athlete, through="Result", related_name="competitions"
-    )
+        Athlete, through="Result", related_name="competitions")
+    description = models.TextField(max_length=1000, blank=True) 
+    event_type = models.CharField(max_length=20, choices=EVENT_TYPES, default='competição')
+    
 
     def __str__(self):
         return self.name
+    
+    def get_absolute_url(self):
+        return reverse('competition_detail', kwargs={'pk': self.pk})
 
 
 class Result(models.Model):

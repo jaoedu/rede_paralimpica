@@ -12,12 +12,6 @@
     <header>
         <nav>
             <a href="{% url 'home' %}">Natação Paralímpica</a>
-            <ul>
-                <li><a href="{% url 'athlete_list' %}">Atletas</a></li>
-                <li><a href="{% url 'competition_calendar' %}">Competições</a></li>
-                <li><a href="{% url 'news_list' %}">Notícias</a></li>
-                <li><a href="{% url 'sponsor_list' %}">Patrocinadores</a></li>
-                <li><a href="{% url 'feed' %}">Feed</a></li>
                 {% if user.is_authenticated %}
                     {% if user.is_athlete or user.is_coach or user.is_sponsor %}
                         <li><a href="{% url 'logout' %}">Logout</a></li>

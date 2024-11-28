@@ -1,12 +1,35 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h1>Cadastrar Patrocinador</h1>
+    <h1>Criar Patrocinador</h1>
 
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
-        {{ form.as_p }}
+        <div class="form-group">
+            <label for="id_name">Nome:</label>
+            {{ form.name }}
+        </div>
+        <div class="form-group">
+            <label for="id_username">Nome de Usuário:</label>
+            {{ form.username }}
+        </div>
+        <div class="form-group">
+            <label for="id_password">Senha:</label>
+            {{ form.password }}
+        </div>
+        <div class="form-group">
+            <label for="id_logo">Logo:</label>
+            {{ form.logo }}
+        </div>
+        <div class="form-group">
+            <label for="id_description">Descrição:</label>
+            {{ form.description }}
+        </div>
+        <div class="form-group">
+            <label for="id_sponsorship_level">Nível de Patrocínio:</label>
+            {{ form.sponsorship_level }}
+        </div>
         <button type="submit" class="btn btn-primary">Salvar</button>
     </form>
-    <a href="{% url 'sponsor_list' %}" class="btn btn-secondary">Voltar para a lista de Patrocinadores</a>
+    <p><a href="{% url 'sponsor_list' %}">Voltar para a lista de patrocinadores</a></p>
 {% endblock %}

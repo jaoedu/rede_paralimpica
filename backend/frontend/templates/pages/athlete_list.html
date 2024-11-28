@@ -10,11 +10,17 @@
                 <div class="card-body">
                     <h5 class="card-title">{{ athlete.user.get_full_name }}</h5>
                     <p class="card-text">Classificação: {{ athlete.functional_classification }}</p>
-                    <p class="card-text">Modalidades: {% for modality in athlete.modalities.all %}{{ modality.name }}, {% endfor %}</p>
+                    <p class="card-text">Modalidades: 
+                        {% for modality in athlete.modalities.all %}
+                            {{ modality.name }}{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </p>
                     <a href="{% url 'athlete_detail' athlete.id %}" class="btn btn-primary">Ver Detalhes</a>
                 </div>
             </div>
         </div>
+        {% empty %}
+            <p>Nenhum atleta cadastrado.</p>
         {% endfor %}
     </div>
 {% endblock %}

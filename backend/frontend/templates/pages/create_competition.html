@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Cadastrar Competição</h1>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}  <!-- Renderiza o formulário -->
+        <button type="submit" class="btn btn-primary">Cadastrar</button>
+    </form>
+    <p><a href="{% url 'competition_calendar' %}">Voltar para o calendário de competições</a></p>
+{% endblock %}

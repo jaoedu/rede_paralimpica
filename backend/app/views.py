@@ -1,3 +1,12 @@
+from django.views.generic.edit import CreateView
+from django.urls import reverse_lazy
+from django.contrib.auth import login
+from django.contrib import messages
+from .models import Athlete, User
+from .forms import AthleteForm
+
+from django.contrib.auth import authenticate, login
+from django.contrib import messages
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import (
     ListView,
@@ -19,6 +28,7 @@ from app.forms import (
     NewsForm,
     SponsorForm,
     LoginForm,
+    UserRegistrationForm,
 )
 from django.utils import timezone
 from django.contrib.auth import login, logout
@@ -40,51 +50,63 @@ class HomeView(ListView):
 # Login View
 def login_view(request):
     if request.method == "POST":
-        form = LoginForm(request.POST)
-        if form.is_valid():
-            username = form.cleaned_data["username"]
-            password = form.cleaned_data["password"]
-            user = User.objects.filter(username=username).first()
-            if user and user.check_password(password):
-                login(request, user)
-                return redirect("home")
-    else:
-        form = LoginForm()
-    return render(request, "pages/login.html", {"form": form})
+        username = request.POST["username"]
+        password = request.POST["password"]
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            login(request, user)
+            return redirect("home")  # Redireciona para a home após login bem-sucedido
+        else:
+            messages.error(request, "Nome de usuário ou senha incorretos.")
+
+    return render(request, "pages/login.html")
 
 
 # Logout View
 def logout_view(request):
     logout(request)
-    return redirect("home")
+    return redirect("index")
 
 
 # Athlete Views
 class AthleteListView(ListView):
     model = Athlete
-    template_name = "pages/athlete_list.html"
-    context_object_name = "athletes"
+    template_name = (
+        "pages/athlete_list.html"  # Certifique-se de que o caminho está correto
+    )
+    context_object_name = "athletes"  # Nome do contexto que será usado no template
+
+    def get_queryset(self):
+        return Athlete.objects.all()  # Retorna todos os atletas
 
 
 class AthleteDetailView(DetailView):
     model = Athlete
     template_name = "pages/athlete_detail.html"
 
-
 class CreateAthleteView(CreateView):
     model = Athlete
     form_class = AthleteForm
     template_name = "pages/create_athlete.html"
-    success_url = reverse_lazy("athlete_list")
+    success_url = reverse_lazy(
+        "login"
+    )  # Redireciona para a página de login após o cadastro
 
     def form_valid(self, form):
-        user = User.objects.create_user(
-            username=form.cleaned_data["username"],
-            password=form.cleaned_data["password"],
+        # Cria o usuário antes de salvar o atleta
+        user = User(username=form.cleaned_data["username"], is_athlete=True)
+        user.set_password(form.cleaned_data["password"])  # Define a senha
+        user.save()  # Salva o usuário
+
+        # Associa o usuário ao atleta
+        athlete = form.save(commit=False)
+        athlete.user = user
+        athlete.save()  # Salva o atleta
+
+        messages.success(
+            self.request, "Atleta cadastrado com sucesso! Faça login para continuar."
         )
-        form.instance.user = user
-        form.instance.user.is_athlete = True
-        form.instance.user.save()
         return super().form_valid(form)
 
 
@@ -128,13 +150,16 @@ class CreateCoachView(CreateView):
     success_url = reverse_lazy("coach_list")
 
     def form_valid(self, form):
-        user = User.objects.create_user(
-            username=form.cleaned_data["username"],
-            password=form.cleaned_data["password"],
-        )
-        form.instance.user = user
-        form.instance.user.is_coach = True
-        form.instance.user.save()
+        # Cria o usuário antes de salvar o treinador
+        user = User(username=form.cleaned_data["username"], is_coach=True)
+        user.set_password(form.cleaned_data["password"])  # Define a senha
+        user.save()  # Salva o usuário
+
+        # Associa o usuário ao treinador
+        coach = form.save(commit=False)
+        coach.user = user
+        coach.save()  # Salva o treinador
+
         return super().form_valid(form)
 
 
@@ -171,7 +196,7 @@ class CompetitionDetailView(DetailView):
     template_name = "pages/competition_detail.html"
 
 
-class CompetitionCreateView(LoginRequiredMixin, CreateView):
+class CompetitionCreateView( CreateView):
     model = Competition
     form_class = CompetitionForm
     template_name = "pages/create_competition.html"
@@ -284,13 +309,16 @@ class CreateSponsorView(CreateView):
     success_url = reverse_lazy("sponsor_list")
 
     def form_valid(self, form):
-        user = User.objects.create_user(
-            username=form.cleaned_data["username"],
-            password=form.cleaned_data["password"],
-        )
-        form.instance.user = user
-        form.instance.user.is_sponsor = True
-        form.instance.user.save()
+        # Cria o usuário antes de salvar o patrocinador
+        user = User(username=form.cleaned_data["username"], is_sponsor=True)
+        user.set_password(form.cleaned_data["password"])  # Define a senha
+        user.save()  # Salva o usuário
+
+        # Associa o usuário ao patrocinador
+        sponsor = form.save(commit=False)
+        sponsor.user = user
+        sponsor.save()  # Salva o patrocinador
+
         return super().form_valid(form)
 
 

@@ -2,6 +2,13 @@
 
 {% block content %}
     <h1>Login</h1>
+    {% if messages %}
+        <div class="alert alert-danger">
+            {% for message in messages %}
+                <p>{{ message }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
     <form method="post">
         {% csrf_token %}
         <div class="form-group">
@@ -14,5 +21,9 @@
         </div>
         <button type="submit" class="btn btn-primary">Entrar</button>
     </form>
-    <p>Não tem uma conta? <a href="{% url 'create_athlete' %}">Cadastre-se como Atleta</a> | <a href="{% url 'create_coach' %}">Cadastre-se como Treinador</a> | <a href="{% url 'create_sponsor' %}">Cadastre-se como Patrocinador</a></p>
+    <p>Não tem uma conta? 
+        <a href="{% url 'create_athlete' %}">Cadastre-se como Atleta</a> | 
+        <a href="{% url 'create_coach' %}">Cadastre-se como Treinador</a> | 
+        <a href="{% url 'create_sponsor' %}">Cadastre-se como Patrocinador</a>
+    </p>
 {% endblock %}

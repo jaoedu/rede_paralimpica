@@ -1,11 +1,44 @@
-{% extends 'base.html' %}
+
+{% extends "base.html" %}
 
 {% block content %}
-    <h1>Novo Atleta</h1>
+    <h1>Criar Atleta</h1>
 
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
-        {{ form.as_p }}
+        <div class="form-group">
+            <label for="id_name">Nome:</label>
+            {{ form.name }}
+        </div>
+        <div class="form-group">
+            <label for="id_username">Nome de Usuário:</label>
+            {{ form.username }}
+        </div>
+        <div class="form-group">
+            <label for="id_password">Senha:</label>
+            {{ form.password }}
+        </div>
+        <div class="form-group">
+            <label for="id_birth_date">Data de Nascimento:</label>
+            {{ form.birth_date }}
+        </div>
+        <div class="form-group">
+            <label for="id_functional_classification">Classificação Funcional:</label>
+            {{ form.functional_classification }}
+        </div>
+        <div class="form-group">
+            <label for="id_competition_history">Histórico de Competições:</label>
+            {{ form.competition_history }}
+        </div>
+        <div class="form-group">
+            <label for="id_personal_records">Recordes Pessoais:</label>
+            {{ form.personal_records }}
+        </div>
+        <div class="form-group">
+            <label for="id_photos">Foto:</label>
+            {{ form.photos }}  <!-- Campo para upload de foto -->
+        </div>
         <button type="submit" class="btn btn-primary">Salvar</button>
     </form>
+    <p><a href="{% url 'athlete_list' %}">Voltar para a lista de atletas</a></p>
 {% endblock %}

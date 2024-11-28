@@ -3,36 +3,28 @@
 {% block content %}
     <h1>Calendário de Competições</h1>
 
-    <div id="calendar"></div>
-
-    <h2>Próximas Competições</h2>
-    <div class="row">
-        {% for competition in competitions %}
-        <div class="col-md-4 mb-4">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">{{ competition.name }}</h5>
-                    <p class="card-text">Data: {{ competition.date }}</p>
-                    <p class="card-text">Local: {{ competition.location }}</p>
-                    <a href="{% url 'competition_detail' competition.id %}" class="btn btn-primary">Ver Detalhes</a>
-                </div>
-            </div>
-        </div>
-        {% endfor %}
+    <div class="calendar">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Nome da Competição</th>
+                    <th>Localização</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for competition in competitions %}
+                    <tr>
+                        <td>{{ competition.date }}</td>
+                        <td>{{ competition.name }}</td>
+                        <td>{{ competition.location }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="3">Nenhuma competição cadastrada.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            var calendarEl = document.getElementById('calendar');
-            var calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'dayGridMonth',
-                events: {{ events|safe }},  // Passa os eventos para o FullCalendar
-            });
-            calendar.render();
-        });
-    </script>
-
-    <link href='https://unpkg.com/@fullcalendar/core@5.10.1/main.min.css' rel='stylesheet' />
-    <script src='https://unpkg.com/@fullcalendar/core@5.10.1/main.min.js'></script>
-    <script src='https://unpkg.com/@fullcalendar/daygrid@5.10.1/main.min.js'></script>
 {% endblock %}

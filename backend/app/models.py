@@ -37,13 +37,26 @@ class User(AbstractUser):
 
 
 class Athlete(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="athlete")
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     birth_date = models.DateField()
-    functional_classification = models.CharField(max_length=50)
-    modalities = models.ManyToManyField("Modality", related_name="athletes")
-    competition_history = models.TextField(blank=True)
-    personal_records = models.TextField(blank=True)
-    photos = models.ManyToManyField("Photo", related_name="athletes", blank=True)
+    functional_classification = models.CharField(max_length=100)
+    competition_history = models.TextField()
+    personal_records = models.TextField()
+    photos = models.ImageField(
+        upload_to="athlete_photos/", blank=True, null=True
+    )  # Campo para a foto
+
+    def __str__(self):
+        return self.user.username
+    
+class AthleteList(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    birth_date = models.DateField()
+    functional_classification = models.CharField(max_length=100)
+    modalities = models.ManyToManyField('Modality', blank=True)  # Supondo que você tenha um modelo Modality
+
+    def __str__(self):
+        return self.user.get_full_name()  # Retorna o nome completo do atleta
 
 
 class Coach(models.Model):
@@ -70,7 +83,6 @@ class Competition(models.Model):
     name = models.CharField(max_length=100)
     date = models.DateField()
     location = models.CharField(max_length=200)
-    modalities = models.ManyToManyField(Modality, related_name="competitions")
     competition_results = models.ManyToManyField(
         Athlete, through="Result", related_name="competitions")
     description = models.TextField(max_length=1000, blank=True) 
